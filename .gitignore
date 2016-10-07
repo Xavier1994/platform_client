@@ -1,0 +1,14 @@
+platform_client.egg-info/
+*.pyc
+*.py.swp
+.tox
+dist/
+build/
+mock*/
+nose*/
+.pybuild/
+*~
+docs/build/
+.coverage
+cover
+env

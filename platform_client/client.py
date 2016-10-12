@@ -8,10 +8,12 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import json
+import functools
 import requests
 import requests.exceptions
 
 from .platform_auth import PlatformAuth
+from .platform_auth import NoneAuth
 from .default_lib import default_service_lib
 from .exceptions import PlatformClientError
 from .exceptions import PlatformServerError
@@ -45,19 +47,19 @@ class PlatformClient(object):
     :param verify_ssl: verify SSL certificates for HTTPS requests, defaults to
     ┊   False
     :type verify_ssl: bool
-    :param services: services the user define use ServiceInstance
-    :type services: ServiceLib
+    :param service_lib: service_lib the user define use ServiceInstance
+    :type service_lib: ServiceLib
     """
 
     def __init__(self,
                  host='localhost',
                  port=7500,
-                 username='root',
-                 password='root',
+                 username='system',
+                 password='YituTech837',
                  timeout=None,
                  ssl=False,
                  verify_ssl=False,
-                 services=default_service_lib,
+                 service_lib=default_service_lib,
                  auth=PlatformAuth
                  ):
         """Construct a new Platform object."""
@@ -66,14 +68,14 @@ class PlatformClient(object):
         self._username = username
         self._password = password
         self._timeout = timeout
-        self._auth = auth
+        self._auth = auth or NoneAuth
 
         self._session = requests.Session()
 
         self._ssl = ssl
         self._verify_ssl = verify_ssl
 
-        self._services = services
+        self._service_lib = service_lib
 
         self._scheme = "http"
         if ssl is True:
@@ -97,6 +99,14 @@ class PlatformClient(object):
         }
 
     @property
+    def service_lib(self):
+        return self._service_lib
+
+    @service_lib.setter
+    def service_lib(self, value):
+        self._service_lib = value
+
+    @property
     def _baseurl(self):
         return self._get_baseurl()
 
@@ -117,8 +127,8 @@ class PlatformClient(object):
     def _get_port(self):
         return self.__port
 
-    def validate_service(self, service_name):
-        if not self._services.has_service(service_name):
+    def _validate_service(self, service_name):
+        if not self._service_lib.has_service(service_name):
             raise PlatformInvalidUrlError(service_name)
 
     def request(self, url, method='POST', params=None, data=None,
@@ -177,10 +187,13 @@ class PlatformClient(object):
         else:
             raise PlatformClientError(response.content, response.status_code)
 
-    def get_service(self, service_name, headers=None, params=None, body=None):
-            self.validate_service(service_name)
+    def get_service_list(self):
+        return self._service_lib.get_service_list()
 
-            service_instance = self._services.get_service_instance(
+    def get_service(self, service_name, headers=None, params=None, body=None):
+            self._validate_service(service_name)
+
+            service_instance = self._service_lib.get_service_instance(
                 service_name
             )
 
@@ -193,12 +206,12 @@ class PlatformClient(object):
                                 params=params,
                                 data=json.dumps(body))
 
-    def dispatch_service(self,
-                         _service_name,
-                         _headers=None,
-                         _params=None,
-                         *args,
-                         **kwargs):
+    def _dispatch_service(self,
+                          _service_name,
+                          _headers=None,
+                          _params=None,
+                          *args,
+                          **kwargs):
         """Dispatch servies to Platform Server
 
         :param _service_name: the name of service, eg. sync_import_image
@@ -210,9 +223,9 @@ class PlatformClient(object):
         :returns: the response from the request
         :rtype: :class:`requests.Response`
         """
-        self.validate_service(_service_name)
+        self._validate_service(_service_name)
 
-        service_instance = self._services.get_service_instance(_service_name)
+        service_instance = self._service_lib.get_service_instance(_service_name)
         method = service_instance.access_method
         url = self._baseurl + service_instance.access_url
 
@@ -225,12 +238,23 @@ class PlatformClient(object):
     def __enter__(self):
         return self
 
-    def __exit__(self):
+    def __exit__(self, *args, **kwargs):
         # reset auth session id, make login again
-        self.auth.session_id = None
+        if hasattr(self._auth, 'session_id'):
+            self._auth.session_id = None
 
     def __getattr__(self, attr):
-        def wrapper(*args, **kwargs):
-            return self.dispatch_service(_service_name=attr, *args, **kwargs)
+        return functools.partial(self._dispatch_service, _service_name=attr)
 
-        return wrapper
+    def __call__(self, func):
+        @functools.wraps(func)
+        def wrapped_function(*args, **kwargs):
+            global_vars = func.__globals__
+            ori_globals = global_vars.copy()
+            for name in self.get_service_list():
+                global_vars[name] = functools.partial(self._dispatch_service,
+                                                      _service_name=name)
+            result = func(*args, **kwargs)
+            global_vars = ori_globals
+            return result
+        return wrapped_function

@@ -10,15 +10,31 @@
 Platform Client -> Transfer Platform Http Service To Specific funtion call
 ~~~~~~~~~~~~~~~~~~~~
 
-usage:
+Formal usage:
 
-   >>> from platform_client import PlatformClient
-   >>> cli = PlatformClient()
-   >>> r = cli.sync_import_image(repository_id=9999, picture_image_content_base64='xxx')
-   >>> r.status_code
-   200
+    >>> from platform_client import PlatformClient
+    >>> cli = PlatformClient()
+    >>> r = cli.sync_import_image(repository_id=9999, picture_image_content_base64='xxx')
+    >>> r.status_code
+    200
 
-usage with `with statement`:
+Context usage:
+
+    >>> from platform_client import PlatformClient
+    >> with PlatformClient() as cli:
+        r = cli.sync_import_image(repository_id=9999, picture_image_content_base64='xxx')
+        print r.status_code
+    200
+
+Decorator usage:
+
+    >>> from Platform import PlatformClient
+    >>> @PlatformClient()
+        def test():
+            r = sync_import_image(repository_id=9999, picture_image_content_base64='xxx')
+            print r.status_code
+    >>> test()
+    200
 
 See more in examples
 

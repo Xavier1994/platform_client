@@ -16,15 +16,13 @@ class ServiceHelper(object):
 
     @staticmethod
     def load_service_lib_from_json(content):
-        services = {}
-        for item in content:
-            services[item] = ServiceInstance(
-                url=content[item].get('url'),
-                port=content[item].get('port'),
-                access_method=content[item].get('method')
-            )
-
-        return ServiceLib(services)
+        return ServiceLib(
+            {name: ServiceInstance(
+                url=content[name].get('url'),
+                port=content[name].get('port'),
+                access_method=content[name].get('method')
+            ) for name in content.keys()}
+        )
 
     @staticmethod
     def load_service_lib_from_file(file_path):

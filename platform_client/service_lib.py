@@ -72,7 +72,13 @@ class ServiceInstance(object):
             raise PlatformInvalidAccessMethodError(new_method)
         self._access_method = new_method
 
-    def __str__(self):
+    def __eq__(self, other):
+        if isinstance(other, ServiceInstance):
+            return (self.port == other.port) and \
+                   (self.url == other.url) and \
+                   (self.access_method == other.access_method)
+
+    def __repr__(self):
         return str(
             {
                 'port': self._port,
@@ -92,5 +98,13 @@ class ServiceLib(object):
     def get_service_instance(self, service_name):
         return self._services.get(service_name)
 
-    def __str__(self):
-        return str(self._services)
+    def get_service_list(self):
+        return self._services.keys()
+
+    def __iter__(self):
+        return iter(self._services.items())
+
+    def __repr__(self):
+        return str(
+            {name: str(service) for name, service in self._services.items()}
+        )

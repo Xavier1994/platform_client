@@ -27,12 +27,6 @@ class TestPlatformClient(unittest.TestCase):
                                   username='system',
                                   password='YituTech837')
 
-    def test_validate_service(self):
-        self.cli.validate_service('sync_import_image')
-
-        with self.assertRaises(PlatformInvalidUrlError):
-            self.cli.validate_service('fuck')
-
     def test_request(self):
         with requests_mock.Mocker() as m:
             m.register_uri(
@@ -184,3 +178,55 @@ class TestPlatformClient(unittest.TestCase):
             )
             with self.assertRaises(PlatformServerError):
                 self.cli.sync_import_image(what='fuck')
+
+    def test_with_context(self):
+        with requests_mock.Mocker() as m:
+            m.register_uri(
+                requests_mock.POST,
+                'http://localhost:7500/resource_manager/user/login',
+                status_code=200,
+                json={'session_id': 1234}
+            )
+            m.register_uri(
+                requests_mock.POST,
+                'http://localhost:9110/car/picture/synchronized',
+                status_code=200,
+                headers={'Content-Type': 'application/json'},
+                json={'rtn': 0, 'message': 'OK', 'result': []}
+            )
+
+            with PlatformClient() as cli:
+                r = cli.sync_import_image(repository_id=1,
+                                          picture_image_content_base64='xxx')
+                result_body = r.json()
+                expected_dict = {'rtn': 0, 'message': 'OK', 'result': []}
+                self.assertDictEqual(expected_dict, result_body)
+                request_body = json.loads(m.last_request.body)
+                expected_dict = {'repository_id': 1,
+                                 'picture_image_content_base64': 'xxx'}
+                self.assertDictEqual(expected_dict, request_body)
+
+    def test_with_decorator(self):
+        with requests_mock.Mocker() as m:
+            m.register_uri(
+                requests_mock.POST,
+                'http://localhost:9110/car/picture/synchronized',
+                status_code=200,
+                headers={'Content-Type': 'application/json'},
+                json={'rtn': 0, 'message': 'OK', 'result': []}
+            )
+
+            @PlatformClient(auth=None)
+            def shit():
+                r = sync_import_image(repository_id=1,
+                                      picture_image_content_base64='xxx')
+                return r
+
+            r = shit()
+            result_body = r.json()
+            expected_dict = {'rtn': 0, 'message': 'OK', 'result': []}
+            self.assertDictEqual(expected_dict, result_body)
+            request_body = json.loads(m.last_request.body)
+            expected_dict = {'repository_id': 1,
+                             'picture_image_content_base64': 'xxx'}
+            self.assertDictEqual(expected_dict, request_body)

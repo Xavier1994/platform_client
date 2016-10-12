@@ -11,6 +11,15 @@ from requests.auth import AuthBase
 from .exceptions import PlatformAuthFailedError
 
 
+class NoneAuth(AuthBase):
+
+    def __init__(self, *args, **kwargs):
+        return
+
+    def __call__(self, r):
+        return r
+
+
 class PlatformAuth(AuthBase):
 
     session_id = None

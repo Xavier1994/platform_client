@@ -50,6 +50,7 @@ class PlatformInvalidUrlError(Exception):
 
 class PlatformConstantSetError(Exception):
     def __init__(self, url):
+        content = 'unknown url: ' + str(url)
         super(PlatformConstantSetError, self).__init__(content)
 
 

@@ -12,7 +12,7 @@ InfluxDB is an open-source distributed time series database, find more about Inf
 Installation
 ============
 
-Install, upgrade and uninstall InfluxDB-Python with these commands::
+Install, upgrade and uninstall platform_client with these commands::
 
     $ cd platform_client
     $ python setup.py install
@@ -62,7 +62,7 @@ Testing
 Make sure you have tox by running the following::
 
     $ cd platform_client
-    $ nosetests -v
+    $ tox
 
 Development
 ===========

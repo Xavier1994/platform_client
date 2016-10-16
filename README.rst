@@ -1,4 +1,5 @@
 Platform-Client is a client for interacting with Platform(include car and face) Maintained by @phate (phate1994@gmail.com)
+In fact, It is just a tool for tansfer http request to function call and provide some convinient wrappers
 
 
 .. _installation:

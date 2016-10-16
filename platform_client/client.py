@@ -229,13 +229,13 @@ class PlatformClient(object):
         service_instance = self._service_lib.get_service_instance(_service_name)
         method = service_instance.access_method
         url = self._baseurl + service_instance.access_url
-        _body.update(kwargs)
+        body = dict(_body, **kwargs)
 
         return self.request(url=url,
                             method=method,
                             headers=_headers,
                             params=_params,
-                            data=json.dumps(_body))
+                            data=json.dumps(body))
 
     def __enter__(self):
         return self

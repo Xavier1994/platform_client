@@ -1,10 +1,4 @@
-
-
 Platform-Client is a client for interacting with Platform(include car and face) Maintained by @phate (phate1994@gmail.com)
-
-.. _readme-about:
-
-InfluxDB is an open-source distributed time series database, find more about InfluxDB_ at http://influxdata.com/
 
 
 .. _installation:
@@ -29,7 +23,6 @@ Main dependency is:
 
 Additional dependencies are:
 
-- pandas: for writing from and reading to DataFrames (http://pandas.pydata.org/)
 - Sphinx: Tool to create and manage the documentation (http://sphinx-doc.org/)
 - Nose: to auto-discover tests (http://nose.readthedocs.org/en/latest/)
 - Mock: to mock tests (https://pypi.python.org/pypi/mock)
@@ -48,13 +41,10 @@ Here's a basic example (for more see the examples directory)::
     $ python
 
     >>> from platform_client import PlatformClient
+    >>> client = PlatformClient()
+    >>> result = client.sync_import_image(repository_id = 1, picture_image_content_base64 = 'xxx')
 
-    >>> client = PlatformClient('localhost', 7500, 'system', 'YituTect837')
-
-    >>> result = client.sync_import_image(repository_id = 1, picture_image_content_base64 = 'xxx') 
-
-    >>> print("Result: {0}".format(result))
-
+See more examples in example folder
 
 Testing
 =======
@@ -76,7 +66,7 @@ problems or submit contributions.
 TODO
 ====
 
-So many things
+- document, add comment to code for using Sphinx to generating doc
 
 
 Source code

@@ -210,6 +210,7 @@ class PlatformClient(object):
                           _service_name,
                           _headers=None,
                           _params=None,
+                          _body={},
                           *args,
                           **kwargs):
         """Dispatch servies to Platform Server
@@ -228,12 +229,13 @@ class PlatformClient(object):
         service_instance = self._service_lib.get_service_instance(_service_name)
         method = service_instance.access_method
         url = self._baseurl + service_instance.access_url
+        _body.update(kwargs)
 
         return self.request(url=url,
                             method=method,
                             headers=_headers,
                             params=_params,
-                            data=json.dumps(kwargs))
+                            data=json.dumps(_body))
 
     def __enter__(self):
         return self

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 from platform_client import PlatformClient, ServiceInstance, ServiceLib
 
 
@@ -10,13 +11,15 @@ def main():
                               access_method='POST')
     service_lib = ServiceLib({'shit': service})
     with PlatformClient(service_lib=service_lib, auth=None) as cli:
-        # 本质上,这里实际上是发送了一个http请求, 请求长这样
+        # in fact, there just send a http request
         # method: POST
         # url: http://$host:80/shit
-        # header: None, 可以指定，比如传入__header={'Content-Type':'application/json'}
-        # param: None, 可以制定,比如__param={'shit':'fuck'}
+        # header: None, can specify header with __header={'Content-Type':'application/json'}
+        # param: None, can sepecify params with __param={'shit':'fuck'}
         # body: {'p1':'shit', 'p2':'fuck'}
-        return cli.shit(p1='shit', p2='fuck')
+        result = cli.shit(p1='shit', p2='fuck')
+        print(result.content)
+        return 0
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

@@ -6,7 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import base64
-from .utils import get_images_from_folder
+from platform_client import get_images_from_folder
 
 
 def sync_import_image(image_path, repoid, client):

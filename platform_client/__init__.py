@@ -51,6 +51,10 @@ __copyright__ = 'Copyright 2016 Wei Xie'
 from .client import PlatformClient
 from .service_lib import ServiceInstance, ServiceLib
 from .service_helper import ServiceHelper
+from .utils import (
+    is_image,
+    get_images_from_folder
+)
 
 
 __all__ = [
@@ -58,5 +62,7 @@ __all__ = [
     'PlatformAuth',
     'ServiceInstance',
     'ServiceLib',
-    'ServiceHelper'
+    'ServiceHelper',
+    'is_image',
+    'get_images_from_folder'
 ]
